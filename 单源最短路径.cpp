@@ -6,7 +6,7 @@ using std::cout;
 using std::endl;
 using std::cin;
 
-//Dijkstra算法
+//Dijkstra
 #define maxint 255
 template<typename T>
 void Dijkstra(int n,int v,T dist[],int prev[],T **c) {
@@ -32,7 +32,7 @@ void Dijkstra(int n,int v,T dist[],int prev[],T **c) {
 		s[u] = true;
 		for (int j=0;j<n;j++){
 			if ((!s[j])&&c[u][j]<maxint){
-				T newdist = dist[u]+c[u][j];//printf("DBG: ND %d\n",newdist);
+				T newdist = dist[u]+c[u][j];
 				if (newdist < dist [j]){
 					dist[j]=newdist;
 					prev[j]=u; //printf("DBG: [%d]=%d\n",j,prev[j]);
@@ -56,7 +56,7 @@ int main() {
 		{maxint,maxint,maxint,10},
 		{maxint,10,maxint,maxint}},
 		dist[N]={},prev[N]={},n=N,v=0;
-	int *c1[n]={};for(int i=0;i<n;++i)c1[i]=c[i]; // **c指向位置不确定
+	int *c1[n]={};for(int i=0;i<n;++i)c1[i]=c[i]; // ...
 	Dijkstra(n,v,dist,prev,c1);
 	for (int i=0;i<n;++i) cout<<prev[i]<<(i==n-1?"\n":" ");
 	return 0;
