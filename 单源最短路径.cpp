@@ -6,7 +6,7 @@ using std::cout;
 using std::endl;
 using std::cin;
 
-//Dijkstra
+//Dijkstra算法
 #define maxint 255
 template<typename T>
 void Dijkstra(int n,int v,T dist[],int prev[],T **c) {
@@ -35,7 +35,7 @@ void Dijkstra(int n,int v,T dist[],int prev[],T **c) {
 				T newdist = dist[u]+c[u][j];
 				if (newdist < dist [j]){
 					dist[j]=newdist;
-					prev[j]=u; //printf("DBG: [%d]=%d\n",j,prev[j]);
+					prev[j]=u;
 				}
 			}
 		}
@@ -56,8 +56,22 @@ int main() {
 		{maxint,maxint,maxint,10},
 		{maxint,10,maxint,maxint}},
 		dist[N]={},prev[N]={},n=N,v=0;
-	int *c1[n]={};for(int i=0;i<n;++i)c1[i]=c[i]; // ...
+	int *c1[n]={};for(int i=0;i<n;++i)c1[i]=c[i]; 
 	Dijkstra(n,v,dist,prev,c1);
-	for (int i=0;i<n;++i) cout<<prev[i]<<(i==n-1?"\n":" ");
+	for (int i=0;i<n;++i) cout<<prev[i]<<(i==n-1?"\n":" "); //输出prev
+	//int p2[N]={v};for(int i=1;i<n;++i)p2[i]=maxint;
+	cout<<(v+1);
+	int t=v;bool noRes=false;
+	while(!noRes){
+		for(int i=0;i<n;++i){
+			if(prev[i]==t){
+				cout<<"->"<<(i+1); //输出最短路径
+				t=i;
+				goto Next;
+			}
+		}
+		noRes=true;
+		Next:;
+	}
 	return 0;
 }
