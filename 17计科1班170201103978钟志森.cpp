@@ -1,97 +1,95 @@
 #include<iostream>
 using namespace std;
 
-template<class Type>
 
-int sorting(Type a[],const Type &num,int length)
+int MatrixChain(int *p, int n, int **m, int **s)
 {
-	int left=0;
-	int right=length-1;
-	while(left<=right)
+	for (int i = 1; i <= n;i++)
+	
+		m[i][i] = 0;
+	
+	for (int r = 2; r <= n; r++)
+	
+		for (int i = 1; i <= n - r + 1; i++)
+		{
+			int j = i + r - 1;
+			m[i][j] = m[i + 1][j] + p[i - 1] * p[i] * p[j];
+			s[i][j] = i;
+			for (int k =i+1; k < j; k++)
+			{
+				int t = m[i][k] + m[k + 1][j] + p[i - 1]*p[k] * p[j];
+				if (t < m[i][j])
+				{
+					m[i][j] = t;
+					s[i][j] = k;
+				}
+			}
+		}
+	
+	return m[1][n];
+}
+
+
+
+void Traceback(int i, int j, int **s)
+{
+	if (i == j)
 	{
-		int middle=(left+right)/2;
-		if(num==a[middle])
-		{
-			return middle;
-		}
-		if(num>a[middle])
-		{
-			left=middle+1;
-		} 
-		else{
-			right = middle-1;
-		}
+		return;
 	}
-	return -1;
+	Traceback(i, s[i][j], s);
+	Traceback(s[i][j] + 1, j, s);
+	cout << "Multiply A" << i << "," << s[i][j];
+	cout << " and A" << (s[i][j] + 1) << "," << j << endl;
 }
 
 
 
 int main()
 {
-	int length,rtn,status2;
-	double a[10],b,num;
-	bool status=false;	
-	bool status1=false;
-	while(1)
+	int num,statues;
+	int length=0;
+	
+	cout << "请输入您要连乘的矩阵的个数:"; cin >> num;
+	int row[num], col[num];
+	for (length=0; length < num;length++)
 	{
-		cout<<"请输入您要输入的二分搜索的数组的长度length（length>0）"<<endl;
-		cout<<"length=";cin>>length; 
-		if(length<=0)
-		{
-			cout<<"输入错误，数组长度应大于0"<<endl;
-		}
-		else
-		{
-			break;
-		 } 
+		cout << "请输入第"<<length+1<<"个矩阵的行和列" << endl;
+		cout << "row:"; cin >> row[length];
+		cout << "col:"; cin >> col[length];	
+		statues=length-1;
+		while(length>0 && row[length] != col[statues])
+			{
+				cout << "error:输入的第" << length+1 << "个矩阵的行与上一个矩阵的列不相等" << endl;
+				cout << "请重新输入" << endl;
+				cout << "请输入第"<<length+1<<"个矩阵的行和列" << endl;
+				cout << "row:"; cin >> row[length];
+				cout << "col:"; cin >> col[length];	
+			}
+		
+		
 	}
-	while(1)
+	int p[num+1];
+	int **s = new int *[num+1];
+	int **m = new int *[num+1];
+	for(int i=0;i<num;i++)
 	{
-		
-		cout<<"请输入一段排好序的"<<length<<"个数字的数组（由小到大）"<<endl;
-		for(int i=0;i<length;i++)
-		{
-		
-			cout<<"a["<<i<<"]=";cin>>a[i];
-			if(i==0)
-			{
-				b=a[0];
-			 } 
-			if(a[i]>=b)
-			{
-				b=a[i];
-			}
-			else{
-				cout<<"第"<<i+1<<"个输入错误，数列不为升序"<<endl;
-				cout<<"请重新输入"<<endl; 
-				break; 
-			}
-			if(i==length-1)
-			{
-				status=true;
-			}
-		}
-			if(status)
-			{
-				break;
-			}
-	} 
-	while(1)
-	{
-		cout<<"请输入要查的数字 num:";cin>>num;
-		rtn=sorting(a,num,length);
-		if(rtn==-1)
-		{
-			cout<<"该数组不存在数字"<<num;
-		}
-		cout<<"数字"<<num<<"位于数组的第"<<rtn<<"位,a["<<rtn<<"]=num="<<num<<endl;
-			cout<<"继续查询请按1，退出查询请按任意键:";cin>>status2;
-		if(status2!=1)
-		{
-			break;
-		}
-	 } 
-	cout<<"已退出系统";
+		p[i]=row[i];
+		cout<<p[i]<<endl;
+	}
+	p[num]=col[num-1];
+	for(int i=0;i<=num;i++)  
+    {  
+		s[i] = new int[num+1];
+		m[i] = new int[num+1];
+    } cout<<"最佳计算如下:"<<endl;
+	 
+	cout<<MatrixChain(p, num, m, s)<<endl;
+	cout<<"最佳计算如下:"<<endl;
+	Traceback(1,num,s);
 	return 0;
- } 
+}
+
+
+
+
