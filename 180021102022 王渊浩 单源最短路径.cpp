@@ -1,106 +1,126 @@
-#include <iostream> 
-#include <fstream>  
-#include <string> 
-using namespace std; 
+#define _CRT_SECURE_NO_WARNINGS
 
-const int N = 5;
-const int M = 1000;
-ifstream fin("4d5.txt"); 
+#include<math.h>
+#include<stdlib.h>
+#include<string>
+#include<iostream>
 
-template<class Type>
-void Dijkstra(int n,int v,Type dist[],int prev[],Type c[][N+1]);
-void Traceback(int v,int i,int prev[]);//输出最短路径 v源点，i终点
+using namespace std;
 
-int main()
-{
-	int v = 1;//源点为1
-	int dist[N+1],prev[N+1],c[N+1][N+1];
+#define MAXINT 1000
 
-	cout<<"有向图权的矩阵为："<<endl;
-	for(int i=1; i<=N; i++)
-	{
-		for(int j=1; j<=N; j++)
-		{
-			fin>>c[i][j];    
-            cout<<c[i][j]<<" ";  
-		}
-		cout<<endl;
-	}
-
-	Dijkstra(N,v,dist,prev,c);
-
-	for(int i=2; i<=N; i++)
-	{
-		cout<<"源点1到点"<<i<<"的最短路径长度为:"<<dist[i]<<"，其路径为";
-		Traceback(1,i,prev);
-		cout<<endl;
-	}
-
-	return 0;
-}
-
-
-template<class Type>
-void Dijkstra(int n,int v,Type dist[],int prev[],Type c[][N+1])
-{
-	bool s[N+1];
-	for(int i=1; i<=n; i++)
-	{
+// v是源 ， n是顶点数
+// dist[i]表示当前从源到顶点i的最短特殊路径长度
+// c[i][j]表示（i,j）的权
+// s[]记录红点集
+void Dijkstra(int n, int v, int dist[], int prev[], int **c) {
+	bool s[MAXINT];
+	for (int i = 1; i <= n; i++) {
 		dist[i] = c[v][i];
 		s[i] = false;
-
-		if(dist[i] == M)
-		{
-			prev[i] = 0;//记录从源到顶点i的最短路径i的前一个顶点
-		}
+		if (dist[i] == MAXINT)
+			prev[i] = 0;
 		else
-		{
 			prev[i] = v;
-		}
 	}
-
 	dist[v] = 0;
 	s[v] = true;
-
-	for(int i=1; i<n; i++)
-	{
-		int temp = M;
-		int u = v;//上一顶点
-
-		//取出V-S中具有最短特殊路径长度的顶点u
-		for(int j=1; j<=n; j++)
-		{
-			if((!s[j]) && (dist[j]<temp))
-			{
+	for (int i = 1; i < n; i++) {
+		int temp = MAXINT;
+		int u = v;
+		for (int j = 1; j <= n; j++) {
+			if ((!s[j]) && (dist[j] < temp)) {
 				u = j;
 				temp = dist[j];
 			}
 		}
 		s[u] = true;
-
-		for(int j=1; j<=n; j++)
-		{
-			if((!s[j]) && (c[u][j]<M))
-			{
-				Type newdist = dist[u] + c[u][j];
-				if(newdist < dist[j])
-				{
+		for (int j = 1; j <= n; j++) {
+			if ((!s[j]) && (c[u][j]<MAXINT)) {
+				int newdist = dist[u] + c[u][j];
+				if (newdist < dist[j]) {
 					dist[j] = newdist;
 					prev[j] = u;
 				}
 			}
 		}
+
+	}
+
+}
+
+//动态分配二维数组
+int** get2Array(int row, int column) {
+	int** array = (int **)malloc(row * sizeof(int *));
+	for (int i = 0; i < row; i++)
+	{
+		array[i] = (int *)malloc(column * sizeof(int));
+	}
+	return array;
+}
+
+// 产生 带权有向图G
+int** createGV() {
+	int n = 5;
+	int **c= get2Array(6, 6);
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < 6; j++) {
+			if (i!=0 && i == j)
+				c[i][j] = 0;
+			else
+				c[i][j] = MAXINT;
+		}
+	}
+	c[1][2] = 10;
+	c[1][4] = 30;
+	c[1][5] = 100;
+	c[2][3] = 50;
+	c[3][5] = 10;
+	c[4][3] = 20;
+	c[4][5] = 60;
+
+	return c;
+
+}
+
+void display(int **c,int row,int column) {
+	for (int i = 0; i < row+1; i++) {
+		for (int j = 0; j < column+1; j++) {
+			if (i == 0) {
+				if (j == 0) {
+					cout << '\t';
+
+				}
+				else
+					cout << j << '\t';
+			}
+			else {
+				if (j == 0)
+					cout << i << '\t';
+				else {
+					if (c[i][j] == MAXINT)
+						cout << '*' << '\t';
+					else
+						cout << c[i][j] << '\t';
+				}
+			}
+		}
+		cout << endl;
 	}
 }
 
-//输出最短路径 v源点，i终点
-void Traceback(int v,int i,int prev[])
-{
-	if(v == i)
-	{
-		cout<<i;
-		return;
-	}
-	Traceback(v,prev[i],prev);
-	cout<<"->"<<i;
+int main() {
+	int n = 5, v = 1;
+	int dist[6];
+	int prev[6];
+	int **c = createGV();
+	display(c, 5, 5);
+	Dijkstra(n, v, dist, prev, c);
+	cout << "请输入目的地:";
+	int destination=0;
+	cin >> destination;
+	cout << "最短路径长度为：";
+	cout << dist[destination] << endl;
+	system("pause");
+	return 0;
 }
