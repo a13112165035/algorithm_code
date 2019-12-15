@@ -1,102 +1,83 @@
-#include <stdio.h>
- 
-#define M    65535 
-#define N    5
+#include<iostream>
+#include<cstring>
+#include<queue>
+using namespace std;
 
-void Dijkstra(int Cost[][N], int v0, int Distance[], int prev[])
+const int N=1010,INF=1e9+7;
+int n,start;
+int map[N][N],dis[N],pre[N];
+bool vis[N];
+
+struct node{
+	int idx,dis,pre;
+	friend bool operator<(node a,node b)
+	{
+		return a.dis>b.dis;
+	}
+};
+
+priority_queue<node>q;
+
+void dijkstra()
 {
-    int s[N];
-    int mindis,dis;
-    int i, j, u;
-    for(i=0; i<N; i++)
-    {
-        Distance[i] = Cost[v0][i];
-        s[i] = 0;
-        if(Distance[i] == M)
-            prev[i] = -1;
-        else
-            prev[i] = v0;
-    }
-    Distance[v0] = 0;
-    s[v0] = 1; //标记v0
-
-    for(i=1; i < N; i++)
-    {
-        mindis = M;
-        u = v0;
-        for (j=0; j < N; j++) 
-            if(s[j]==0 && Distance[j]<mindis)
-            {
-                mindis = Distance [j];
-                u = j;
-            } 
-        s[u] = 1;
-        for(j=0; j<N; j++) 
-        if(s[j]==0 && Cost[u][j]<M)
-        { 
-            dis = Distance[u] +Cost[u][j];
-     
- 
-            if(Distance[j] > dis)
-            {
-                Distance[j] = dis;
-                prev[j] = u;
-            }
-        } 
-    }
+	dis[start] = 0;
+	q.push(node{start,dis[start],start});
+	while(!q.empty())
+	{
+		node now=q.top();
+		q.pop();
+		int k=now.idx;
+		if(!vis[k])
+		{
+			vis[k]=1;
+			pre[k]=now.pre;
+			for(int j=1;j<=n;j++)
+				if(dis[j]>dis[k]+map[k][j])
+				{
+					dis[j] = dis[k]+map[k][j];
+					q.push(node{j,dis[j],k});
+				}
+		} 
+	}
 }
 
-void PrintPrev(int prev[],int v0,int vn)
+void find(int x)
 {
-    int tmp = vn;
-    int i, j;
-    int tmpprv[N];
-    for(i=0; i < N; i++)
-        tmpprv[i] = 0;
-    tmpprv[0] = vn+1;
-    for(i =0, j=1; j < N ;j++)
-    {
-        if(prev[tmp]!=-1 && tmp!=0)
-        {
-            tmpprv[i] = prev[tmp]+1;
-            tmp = prev[tmp];
-            i++;
-        }
-        else break;
-    }
- 
-    for(i=N-1; i >= 0; i--)
-    {
-        if(tmpprv[i] != 0)
-        {
-            printf("V%d", tmpprv[i]);
-            if(i)  
-                printf("-->");
-        }
-    }
-    printf("-->V%d", vn+1);
+	if(x!=start)
+	{
+		find(pre[x]);
+		cout<<"->";
+	}
+	cout<<x;
 }
+
 int main()
 {
-    char *Vertex[N]={"V1", "V2", "V3", "V4", "V5"};
-
-    int Cost[N][N]={
-        {0, 10, M, 50, 100},
-        {M, 0, 60, M, M},
-        {M, M, 0, M, 40},
-        {M, M, 30, 0, 40},
-        {M, M, M, M, 0},
-    };
-    int Distance[N]; 
-    int prev[N]; 
-    int i;
-    Dijkstra(Cost, 0, Distance, prev);
-    for(i=0; i < N; i++)
-    {
-        printf("%s-->%s:%d\t", Vertex[0], Vertex[i], Distance[i]);
-        PrintPrev(prev, 0, i);
-        printf("\n");
-    }
- 
-    return 0;
+	int m;
+	memset(map,0x3f,sizeof map);
+	memset(dis,0x3f,sizeof dis);
+	cout<<"输入图中点的个数，边的个数"<<endl;
+	cin>>n>>m;
+	cout<<"输入每条边连通的两个点的序号，边的权重"<<endl;
+	for(int i=0;i<m;i++)
+	{
+		int x,y,z; 
+		cin>>x>>y>>z;
+		if(z<map[x][y]) 
+		{
+			map[x][y]=z;
+			map[y][x]=z;
+		}
+	}
+	cout<<"输入起点编号：";
+	cin>>start; 
+	dijkstra(); 
+	for(int i=1;i<=n;i++)
+		if(dis[i]!=INF)
+		{
+			find(i); 
+			cout<<"，"<<start<<"点到"<<i<<"号点的最短距离："<<dis[i]<<endl; 
+		} 
+		else cout<<start<<"与"<<i<<"号点不连通"<<endl; 
+	return 0; 
 }
