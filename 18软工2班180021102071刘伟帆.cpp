@@ -1,75 +1,60 @@
-#include<iostream>
+#include <vector>
+#include <iostream> 
+using namespace std; 
+struct edge{	
+	int to, 
+	cost;}; 
+const int MAX = 10001;
+const int INF = 0x3f3f3f3f; // 假设这是无法到达的话的距离 
 
-#define LEN 6 // 连乘的矩阵个数
-
-using namespace std;
-
-//矩阵的维数分别是 30x35,35x15,15x5,5x10,10x20,20x25
-
-int p[LEN + 1] ={ 30,35,15,5,10,20,25};
-
-int m[LEN + 1][LEN + 1] = { 0,0,0};
-
-int s[LEN + 1][LEN + 1] = { 0,0,0};
-
-void MatrixChain(int *p,int m[][LEN + 1], int s[][LEN + 1]){
-
-    for(int i = 0; i <= LEN; ++i){
-        m[i][i] = 0;
-    }//初始化，即链长为1
-    for(int r = 2; r <= LEN; ++r){//链长从2到LEN
-
-        for(int i = 1; i <= LEN - r + 1; ++i){//对i位置的矩阵计算链长为r的最优解
-
-            int j = i + r - 1;
-
-            m[i][j] = m[i + 1][j] + p[i-1]*p[i]*p[j];  //直接计算矩阵所需要计算的次数
-
-            s[i][j] = i;
-
-            for(int k = i + 1; k < j; ++k){//k 是i,j 之间的断点
-
-                int t = m[i][k] + m[k + 1][j] + p[i-1]*p[k]*p[j];//m[i][k] + m[k + 1][j]链长短于当前链，因此已经计算出
-
-                if(m[i][j] > t){
-
-                    s[i][j] = k;//断开点
-
-                    m[i][j] = t;//最小计算量
-
-                }
-            }
-        }
-    }
+vector<edge> G[MAX]; // 图
+int d[MAX];
+int used[MAX];
+int V; // 顶点数
+int E; // 边数
+int s; // 出发的点 
+void creat(){	
+		// 因为只是支持顶点 0 ~ n， 如果顶点是 1 ~ n, 自行更改 只要把顶点的值减 1 就行了	
+		// 这里假设是 0 ~ n	
+		cin >> V >> E >> s;	
+		for(int i = 0; i < E; ++i){	    
+			int from, to, cost;	    
+			cin >> from >> to >> cost;	    
+			edge e;	    
+			e.to = to;	    
+			e.cost = cost;	    
+			G[from].push_back(e);	
+			}
+		} 
+void Dijkstra(int s){	
+		fill(d, d + V, INF);	
+		fill(used, used + V, false);	
+		d[s] = 0;	
+		while(true){	    
+			int v = -1;	    
+		for(int i = 0; i < V; ++i){		
+			if(!used[i] && (v == -1 || d[v] > d[i])){ // 寻找到达某一点的最短距离			
+				v = i;		
+				}	    
+			}	    
+		if(v == -1) break;	    
+		used[v] = true;	    
+		for(int i = 0; i < (int)G[v].size(); ++i){	        
+			edge e = G[v][i];		
+			if(d[v] != INF) // 如果存在不能到达的点的话，则不予考虑                
+			d[e.to] = min(d[e.to], d[v] + e.cost); // v -> i 从v到 e.to顶点的距离	    
+			}	
+		}
+	} 
+void solve(){	
+		creat();	
+		Dijkstra(s);	
+		for(int i = 0; i < V; ++i) 
+		cout << d[i] << ' '; // 输出到达各个顶点的最短距离， 如果无法到达结果为 INF
+	}
+int main(){	
+	solve();	
+	return 0;
 }
 
-void TrackBack(int i, int j,int s[][LEN + 1]){
 
-    if(i == j || i == LEN){
-
-        cout<<"A"<<i;
-
-        return;
-
-    } 
-
-    cout<<"(";
-
-    TrackBack(i,s[i][j],s);
-
-    cout<<")(";
-
-    TrackBack(s[i][j] + 1,j,s);
-
-    cout<<")";
-
-}
-
-int main()
-{
-    MatrixChain(p,m,s); 
-
-    TrackBack(1,LEN,s);
-
-    cout<<endl;
-}
